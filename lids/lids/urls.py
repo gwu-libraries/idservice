@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
-from idapp.views import mint, bind, lookup
+from lidapp.views import mint, bind, lookup, form
+
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -12,8 +13,14 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^mint/(\d)?$',mint),
-    url(r'^bind/(\w)$',bind),
-    url(r'^lookup/(\w)$',lookup),
-    
+    url(r'^mint/(?P<minter>\w)/(?P<quantity>[1-9][0-9]{0,2})(\d)?$',mint),
+    url(r'^mint/(?P<minter>\w)?$', form, {'action':'mint'}),
+
+    url(r'^bind/(?P<id>\w)$', bind),
+    url(r'^bind/', form, {'action':'bind'}),                   
+
+    url(r'^lookup/(?P<id>\w)$',lookup),
+    url(r'^lookup/$', form, {'action':'lookup'}),
+
+    url(r'^/$', form),
 )
