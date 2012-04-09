@@ -154,9 +154,20 @@ LOGGING = {
 }
 
 # ID SERVICE CONFIGURATIONS
-# Name Mapping Authority number for minting ARKs
-NMA = '38989'
-# Template for minting ARKs
-ARK_TEMPLATE = 'eeddeeddk'
-# Default minter prefix
-DEFAULT_MINTER = 'c01'
+
+# Models settings
+OBJECT_TYPES = (
+    ('i', 'item'),
+    ('c', 'collection'),
+    )
+ID_TYPES = (
+    ('a', 'ark'),
+    #Examples of other IDs we may create in the future
+    #('h', 'handle'),
+    #('d', 'doi'),
+    )
+ACTIONS = (
+    ('m','mint'),
+    ('b','bind'),
+    ('l','lookup'),
+    )
