@@ -1,40 +1,26 @@
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
+from django.shortcuts import render_to_response
 from idapp.models import ID
-from services import arks
 
-ID_ATTRIBUTES = ['id_type','path','description','owner']
 
 def mint(request, quantity=1):
     #TODO: Add expriation date to minted ids? 
-    if not quantity.isdigit():
-        return HttpResponseBadRequest('The quantity requested was not a valid integer.')
-    ids = arks.mint(quantity=quantity, owner=HttpRequest.get_host())
-    output = ''
-    for id in ids:
-        output += id + '\n'
-    return HttpResponse(output.rstrip())
+    ids = ID.mint(quantity=quantity, owner=request.PUT[requester])
+    output = '\n'.join(ids)
+    return HttpResponse(output)
         
-
 def bind(request, id):
-    #TODO: Add interface/form for manual update
-    #TODO: Add error handling
-    kwargs = {}
-    for attribute in ID_ATTRIBUTES:
+    kwargs = {'object_type':'', 'object_url':'', 'description':'', 'requester':''}
+    for attribute in kwargs:
         if attribute in request.POST:
             kwargs[attribute] = request.POST[attribute]
-    results = arks.bind(id, **kwargs)
-    return HttpResponse(_format_id_list(results))
-
+    results = ID.bind(id, **kwargs)
+    return render_to_response('id_dump.txt', {'data':results})
 
 def lookup(request, id):
-    return HttpResponse(_format_id_list(arks.lookup(id)))
+    results = ID.lookup(id, request.POST[requester])
+    return render_to_response('id_dump.txt', {'data':results})
 
-
-def _format_id_list(ids):
-    output = ''
-    for id in ids:
-        line = 'identifier:%s, ' % (id.identifier)
-        for attribute in ID_ATTRIBUTES:
-            line += '%s:%s, ' % (attribute, getattr(id, attribute))
-        output += line.rstrip([, ])+'\n'
-    return output.rstrip()
+def form(request, action, minter=''):
+    #TODO: create a form UI for manual input
+    pass

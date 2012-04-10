@@ -1,0 +1,9 @@
+ID:{%data.identifier%}
+ID Type:{%data.id_type%}
+Date Created:{%data.date_created%}
+Date Updated:{%data.date_updated%}
+Minter:{%data.minter%}
+Requester:{%data.requester%}
+Object URL:{%data.object_url%}
+Object Type:{%data.object_type%}
+Description:{%data.description%}

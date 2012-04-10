@@ -54,7 +54,7 @@ class ID(models.Model):
             return False
         return True
 
-    def lookup(self, identifier):
+    def lookup(self, identifier, requester):
         res = ID.objects.filter(identifier=identifier)
         if res.count() == 0:
             return None
@@ -70,7 +70,7 @@ class ID(models.Model):
             ID.objects.create(identifier=id, requester=requester, date_created=datetime.datetime.now())
             ids.append(id)
         return ids
-    
+
     def generate_id(self, id_type, prefix, authority_number, template):
         if id_type == 'ark':
             ark = arkpy.mint(authority=authority_number, template=template)
@@ -84,7 +84,6 @@ class ID(models.Model):
             return ''
         '''
 
-    #TODO: change to bind()
     def bind(self, identifier, **kwargs):
         id = ID.objects.filter(identifier=identifier)
         for pair in kwargs.items():
