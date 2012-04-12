@@ -38,30 +38,33 @@ class ID(models.Model):
     object_type = models.CharField(max_length=1, choices=settings.OBJECT_TYPES, blank=True)
     description = models.TextField(blank=True)
 
-    def exists(self, identifier):
+    @staticmethod
+    def exists(identifier):
         try:
             res = ID.objects.get(identifier=identifier)
             return True
         except:
             return False
 
-    def lookup(self, identifier, requester_name, requester_ip=''):
+    @staticmethod
+    def lookup(identifier, requester_name, requester_ip=''):
         try:
             id = ID.objects.get(identifier=identifier)
             successful, message = True, ''
         except Exception, e:
             id, successful, message = None, False, str(e)            
         finally:
-            Log.add_entry(successful=successful, action='lookup', identifier=identifier,
+            Log.add_entry(successful=successful, action='l', identifier=identifier,
                           requester_name=requester_name, requester_ip=requester_ip, message=message)
             return id
 
-    def mint(self, requester_name, requester_ip='', minter_name=settings.DEFAULT_MINTER, quantity=1):
+    @staticmethod
+    def mint(requester_name, requester_ip='', minter_name=settings.DEFAULT_MINTER, quantity=1):
         ids = []
         try:
             requester = Requester.objects.get(name=requester_name)
             minter = Minter.objects.get(minter_name=minter_name)
-            successful, message = True, str(e)
+            successful, message = True, ''
         except Exception, e:
             successful, message = False, str(e)
         else:
@@ -69,27 +72,28 @@ class ID(models.Model):
                 qt = str(i) + ' of ' + str(quantity)
                 try:
                     suc, msg = True, ''
-                    identifier = self._generate_id(id_type=minter.id_type, prefix=minter.minter_prefix,
-                                          authority_number=minter.authority_number, template=minter.template)
-                    while self.exists(identifier):
-                        identifier = self._generate_id(id_type)
+                    identifier = _generate_id(id_type=minter.id_type, prefix=minter.minter_prefix,
+                                                   authority_number=minter.authority_number, template=minter.template)
+                    while exists(identifier):
+                        identifier = _generate_id(id_type)
                     ID.objects.create(identifier=identifier, minter=minter, requester=requester.id, date_created=datetime.now())
                     ids.append(identifier)
                 except Exception, e:
                     suc, msg = False, str(e)
                 finally:
-                    Log.add_entry(successful=suc,  action='mint', identifier=identifier,
+                    Log.add_entry(successful=suc,  action='m', identifier=identifier,
                                   requester_name=requester_name, requester_ip=requester_ip,
                                   minter_name=minter.name, quantity=qt, message=msg)
         finally:
-            Log.add_entry(successful=successful,  action='mint', identifier='',
+            Log.add_entry(successful=successful,  action='m', identifier='',
                           requester_name=requester_name, requester_ip=requester_ip,
-                          minter_name=minter.name, quantity=quantity, message=message)
+                          minter_name=minter_name, quantity=quantity, message=message)
             return ids
 
-    def _generate_id(self, id_type, prefix, authority_number, template):
+    @staticmethod
+    def _generate_id(id_type, prefix, authority_number, template):
         if id_type == 'ark':
-            ark = arkpy.mint(authority=authority_number, template=template)
+            ark = arkpy.mint(authority=authority_number, prefix=prefix, template=template)
             return ark
         # Stubs for potential future id types
         '''
@@ -100,7 +104,8 @@ class ID(models.Model):
             return ''
         '''
 
-    def bind(self, identifier, requester_name, requester_ip='', **kwargs):
+    @staticmethod
+    def bind(identifier, requester_name, requester_ip='', **kwargs):
         try:
             id = ID.objects.get(identifier=identifier)
             for pair in kwargs.items():
@@ -112,7 +117,7 @@ class ID(models.Model):
         except Exception, e:
             successful, message = False, str(e)
         finally:
-            Log.add_entry(successful=successful, action='bind', identifier=identifier,
+            Log.add_entry(successful=successful, action='b', identifier=identifier,
                           requester_name=requester_name, requester_ip=requester_ip,
                           quantity=1, message=message)
             return id
@@ -125,12 +130,13 @@ class Log(models.Model):
     minter_name = models.CharField(max_length=7, blank=True)
     action = models.CharField(max_length=1, choices=settings.ACTIONS)
     quantity = models.CharField(max_length=12, blank=True)
-    requester = models.CharField(max_length=63, blank=True)
+    requester_name = models.CharField(max_length=63, blank=True)
     requester_ip = models.CharField(max_length=15, blank=True)
     successful = models.BooleanField()
     message = models.TextField(blank=True)
-    
-    def add_entry(self, successful, action, identifier='',
+
+    @staticmethod
+    def add_entry(successful, action, identifier='',
                   requester_name='', requester_ip='',
                   minter_name='',quantity='1', message=''):
         timestamp = datetime.now()
