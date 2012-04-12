@@ -1,33 +1,23 @@
+from datetime import datetime
 from django.db import models
-from lidapp import settings
-import datetime
+from lids import settings
 import arkpy
-
-
-class Log(models.Model):
-
-    timestamp = models.DateTimeField()
-    action = models.CharField(max_length=1, choices=settings.ACTIONS)
-    requester = models.ForeignKey('Requester')
-    minter = models.ForeignKey('Minter')
-    identifier = models.ForeignKey('ID')
-    description = models.textField()
 
 
 class Requester(models.Model):
 
-    name = models.CharField()
-    organization = models.CharField()
+    name = models.CharField(max_length=63)
+    organization = models.CharField(max_length=63)
     date_created = models.DateTimeField()
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
 
-class Minter(models,Model):
+class Minter(models.Model):
 
-    name = models.CharField()
-    authority_number = CharField()
+    name = models.CharField(max_length=7)
+    authority_number = models.CharField(max_length=15)
     prefix = models.CharField(max_length=7, blank=True)
-    template = models.CharField(blank=True)
+    template = models.CharField(max_length=25, blank=True)
     minter_type = models.CharField(max_length=1, choices=settings.ID_TYPES)
     date_created = models.DateTimeField()
     description = models.TextField()
@@ -36,42 +26,68 @@ class Minter(models,Model):
 class ID(models.Model):
     
     # System generated fields
-    identifier = models.CharField()
+    identifier = models.CharField(max_length=25)
     date_created = models.DateTimeField()
     date_updated = models.DateTimeField(blank=True)
     id_type = models.CharField(max_length=1, choices=settings.ID_TYPES) #This field is redundant on purpose
     # Required user-specified fields
-    minter = models.ForeignKey('Minter')
-    requester = models.ForeignKey('Requester')
+    minter = models.ForeignKey(Minter, related_name='id_minter')
+    requester = models.ForeignKey(Requester, related_name='id_requester')
     # Non-required user-specified fields
     object_url = models.URLField(blank=True)
     object_type = models.CharField(max_length=1, choices=settings.OBJECT_TYPES, blank=True)
     description = models.TextField(blank=True)
 
     def exists(self, identifier):
-        res = ID.objects.filter(identifier=identifier)
-        if res.count() == 0:
+        try:
+            res = ID.objects.get(identifier=identifier)
+            return True
+        except:
             return False
-        return True
 
-    def lookup(self, identifier, requester):
-        res = ID.objects.filter(identifier=identifier)
-        if res.count() == 0:
-            return None
-        return res[0]
+    def lookup(self, identifier, requester_name, requester_ip=''):
+        try:
+            id = ID.objects.get(identifier=identifier)
+            successful, message = True, ''
+        except Exception, e:
+            id, successful, message = None, False, str(e)            
+        finally:
+            Log.add_entry(successful=successful, action='lookup', identifier=identifier,
+                          requester_name=requester_name, requester_ip=requester_ip, message=message)
+            return id
 
-    def mint(self, requester, minter_name=settings.DEFAULT_MINTER, quantity=1):
+    def mint(self, requester_name, requester_ip='', minter_name=settings.DEFAULT_MINTER, quantity=1):
         ids = []
-        minter = Minter.objects.filter(minter_name=minter_name)
-        for range(0, quantity):
-            id = generate_id(id_type=minter.id_type, prefix=minter.minter_prefix, authority_number=minter.authority_number, template=minter.template)
-            while exists(id):
-                id = generate_id(id_type)
-            ID.objects.create(identifier=id, requester=requester, date_created=datetime.datetime.now())
-            ids.append(id)
-        return ids
+        try:
+            requester = Requester.objects.get(name=requester_name)
+            minter = Minter.objects.get(minter_name=minter_name)
+            successful, message = True, str(e)
+        except Exception, e:
+            successful, message = False, str(e)
+        else:
+            for i in range(1, quantity+1):
+                qt = str(i) + ' of ' + str(quantity)
+                try:
+                    suc, msg = True, ''
+                    identifier = self._generate_id(id_type=minter.id_type, prefix=minter.minter_prefix,
+                                          authority_number=minter.authority_number, template=minter.template)
+                    while self.exists(identifier):
+                        identifier = self._generate_id(id_type)
+                    ID.objects.create(identifier=identifier, minter=minter, requester=requester.id, date_created=datetime.now())
+                    ids.append(identifier)
+                except Exception, e:
+                    suc, msg = False, str(e)
+                finally:
+                    Log.add_entry(successful=suc,  action='mint', identifier=identifier,
+                                  requester_name=requester_name, requester_ip=requester_ip,
+                                  minter_name=minter.name, quantity=qt, message=msg)
+        finally:
+            Log.add_entry(successful=successful,  action='mint', identifier='',
+                          requester_name=requester_name, requester_ip=requester_ip,
+                          minter_name=minter.name, quantity=quantity, message=message)
+            return ids
 
-    def generate_id(self, id_type, prefix, authority_number, template):
+    def _generate_id(self, id_type, prefix, authority_number, template):
         if id_type == 'ark':
             ark = arkpy.mint(authority=authority_number, template=template)
             return ark
@@ -84,11 +100,39 @@ class ID(models.Model):
             return ''
         '''
 
-    def bind(self, identifier, **kwargs):
-        id = ID.objects.filter(identifier=identifier)
-        for pair in kwargs.items():
-            if pair[1] != '' and pair[0] in dir(ID):
-                setattr(id, pair[0], pair[1])
-        id.save()
-        return id
+    def bind(self, identifier, requester_name, requester_ip='', **kwargs):
+        try:
+            id = ID.objects.get(identifier=identifier)
+            for pair in kwargs.items():
+                if pair[1] != '' and pair[0] in ID.__dict__:
+                    setattr(id, pair[0], pair[1])
+            id.date_updated = datetime.now()
+            id.save()
+            successful, message = True, ''
+        except Exception, e:
+            successful, message = False, str(e)
+        finally:
+            Log.add_entry(successful=successful, action='bind', identifier=identifier,
+                          requester_name=requester_name, requester_ip=requester_ip,
+                          quantity=1, message=message)
+            return id
+
     
+class Log(models.Model):
+
+    timestamp = models.DateTimeField()
+    identifier = models.CharField(max_length=25, blank=True)
+    minter_name = models.CharField(max_length=7, blank=True)
+    action = models.CharField(max_length=1, choices=settings.ACTIONS)
+    quantity = models.CharField(max_length=12, blank=True)
+    requester = models.CharField(max_length=63, blank=True)
+    requester_ip = models.CharField(max_length=15, blank=True)
+    successful = models.BooleanField()
+    message = models.TextField(blank=True)
+    
+    def add_entry(self, successful, action, identifier='',
+                  requester_name='', requester_ip='',
+                  minter_name='',quantity='1', message=''):
+        timestamp = datetime.now()
+        quantity = str(quantity)
+        Log.objects.create(**locals())

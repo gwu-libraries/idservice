@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'lidapp',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -157,6 +158,7 @@ LOGGING = {
 }
 
 # ID SERVICE CONFIGURATIONS
+DEFAULT_MINTER = 'ark'
 
 # Models settings
 OBJECT_TYPES = (
