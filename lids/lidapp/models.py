@@ -28,7 +28,7 @@ class ID(models.Model):
     # System generated fields
     identifier = models.CharField(max_length=25)
     date_created = models.DateTimeField()
-    date_updated = models.DateTimeField(blank=True)
+    date_updated = models.DateTimeField(blank=True, null=True)
     id_type = models.CharField(max_length=1, choices=settings.ID_TYPES) #This field is redundant on purpose
     # Required user-specified fields
     minter = models.ForeignKey(Minter, related_name='id_minter')
@@ -40,105 +40,57 @@ class ID(models.Model):
 
     @staticmethod
     def exists(identifier):
-        try:
-            res = ID.objects.get(identifier=identifier)
-            return True
-        except:
-            return False
+        res = ID.objects.filter(identifier=identifier)
+        return True if len(res) > 0 else False
 
     @staticmethod
-    def lookup(identifier, requester_name, requester_ip=''):
+    def lookup(identifier):
         try:
             id = ID.objects.get(identifier=identifier)
-            successful, message = True, ''
-        except Exception, e:
-            id, successful, message = None, False, str(e)            
-        finally:
-            Log.add_entry(successful=successful, action='l', identifier=identifier,
-                          requester_name=requester_name, requester_ip=requester_ip, message=message)
             return id
+        except Exception, e:
+            return None
 
     @staticmethod
-    def mint(requester_name, requester_ip='', minter_name=settings.DEFAULT_MINTER, quantity=1):
+    def mint(requester_name, minter_name, quantity=1):
         ids = []
         try:
             requester = Requester.objects.get(name=requester_name)
-            minter = Minter.objects.get(minter_name=minter_name)
-            successful, message = True, ''
+            minter = Minter.objects.get(name=minter_name)
         except Exception, e:
-            successful, message = False, str(e)
+            return ids
         else:
-            for i in range(1, quantity+1):
-                qt = str(i) + ' of ' + str(quantity)
-                try:
-                    suc, msg = True, ''
-                    identifier = _generate_id(id_type=minter.id_type, prefix=minter.minter_prefix,
-                                                   authority_number=minter.authority_number, template=minter.template)
-                    while exists(identifier):
-                        identifier = _generate_id(id_type)
-                    ID.objects.create(identifier=identifier, minter=minter, requester=requester.id, date_created=datetime.now())
-                    ids.append(identifier)
-                except Exception, e:
-                    suc, msg = False, str(e)
-                finally:
-                    Log.add_entry(successful=suc,  action='m', identifier=identifier,
-                                  requester_name=requester_name, requester_ip=requester_ip,
-                                  minter_name=minter.name, quantity=qt, message=msg)
-        finally:
-            Log.add_entry(successful=successful,  action='m', identifier='',
-                          requester_name=requester_name, requester_ip=requester_ip,
-                          minter_name=minter_name, quantity=quantity, message=message)
+            for i in range(int(quantity)):
+                identifier = ID._generate_id(id_type=minter.minter_type, prefix=minter.prefix,
+                                             authority_number=minter.authority_number, template=minter.template)
+                while ID.exists(identifier):
+                    identifier = ID._generate_id(id_type)
+                ID.objects.create(identifier=identifier, minter=minter, id_type=minter.minter_type,
+                                  requester=requester, date_created=datetime.now())
+                ids.append(identifier)
             return ids
 
     @staticmethod
     def _generate_id(id_type, prefix, authority_number, template):
-        if id_type == 'ark':
-            ark = arkpy.mint(authority=authority_number, prefix=prefix, template=template)
-            return ark
-        # Stubs for potential future id types
-        '''
+        if id_type == 'a':
+            return arkpy.mint(authority=authority_number, prefix=prefix, template=template)
+        ''' Stubs for potential future id types
         elif id_type == 'Handle':
-            handle = ''
-            return handle
+            return handle.mint()
         else:
             return ''
         '''
 
     @staticmethod
-    def bind(identifier, requester_name, requester_ip='', **kwargs):
+    def bind(identifier, **kwargs):
         try:
             id = ID.objects.get(identifier=identifier)
-            for pair in kwargs.items():
-                if pair[1] != '' and pair[0] in ID.__dict__:
-                    setattr(id, pair[0], pair[1])
+        except Exception, e:
+            return None
+        else:
+            for att in kwargs.keys():
+                if att in ['object_url','object_type','description']:
+                    setattr(id, att, kwargs[att])
             id.date_updated = datetime.now()
             id.save()
-            successful, message = True, ''
-        except Exception, e:
-            successful, message = False, str(e)
-        finally:
-            Log.add_entry(successful=successful, action='b', identifier=identifier,
-                          requester_name=requester_name, requester_ip=requester_ip,
-                          quantity=1, message=message)
             return id
-
-    
-class Log(models.Model):
-
-    timestamp = models.DateTimeField()
-    identifier = models.CharField(max_length=25, blank=True)
-    minter_name = models.CharField(max_length=7, blank=True)
-    action = models.CharField(max_length=1, choices=settings.ACTIONS)
-    quantity = models.CharField(max_length=12, blank=True)
-    requester_name = models.CharField(max_length=63, blank=True)
-    requester_ip = models.CharField(max_length=15, blank=True)
-    successful = models.BooleanField()
-    message = models.TextField(blank=True)
-
-    @staticmethod
-    def add_entry(successful, action, identifier='',
-                  requester_name='', requester_ip='',
-                  minter_name='',quantity='1', message=''):
-        timestamp = datetime.now()
-        quantity = str(quantity)
-        Log.objects.create(**locals())

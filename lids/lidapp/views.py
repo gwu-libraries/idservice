@@ -1,26 +1,24 @@
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from idapp.models import ID
+from django.shortcuts import render_to_response, get_object_or_404
+from lidapp.models import ID
 
 
-def mint(request, quantity=1):
-    #TODO: Add expriation date to minted ids? 
-    ids = ID.mint(quantity=quantity, owner=request.PUT[requester])
+def mint(request, minter_name, quantity=1):
+    ids = ID.mint(requester_name=request.GET['requester'], minter_name=minter_name, quantity=quantity)
     output = '\n'.join(ids)
     return HttpResponse(output)
         
-def bind(request, id):
-    kwargs = {'object_type':'', 'object_url':'', 'description':'', 'requester':''}
+def bind(request, identifier):
+    kwargs = {'object_type':'', 'object_url':'', 'description':''}
     for attribute in kwargs:
         if attribute in request.POST:
             kwargs[attribute] = request.POST[attribute]
-    results = ID.bind(id, **kwargs)
-    return render_to_response('id_dump.txt', {'data':results})
+        else:
+            kwargs.remove(attribute)
+    id = ID.bind(identifier, **kwargs)
+    return render_to_response('id_dump.txt', {'id':id})
 
-def lookup(request, id):
-    results = ID.lookup(id, request.POST[requester])
-    return render_to_response('id_dump.txt', {'data':results})
+def lookup(request, identifier):
+    id = get_object_or_404(ID,identifier=identifier)
+    return render_to_response('id_dump.txt', {'id':id})
 
-def form(request, action, minter=''):
-    #TODO: create a form UI for manual input
-    pass
