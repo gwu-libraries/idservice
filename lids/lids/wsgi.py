@@ -13,7 +13,9 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
-import os
+import os, site
+
+site.addstedir('/home/joshuagomez/Projects/idservice/ENV/lib/python2.6/site-packages')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idservice.settings")
 
