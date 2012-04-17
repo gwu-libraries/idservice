@@ -176,3 +176,8 @@ ACTIONS = (
     ('b','bind'),
     ('l','lookup'),
     )
+
+try:
+    from local_settings.py import *
+except ImportError:
+    pass
