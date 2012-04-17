@@ -13,8 +13,8 @@ def bind(request, identifier):
     fields = ['object_type', 'object_url', 'description']
     kwargs = {}
     for attribute in fields:
-        if attribute in request.POST:
-            kwargs[attribute] = request.POST[attribute]
+        if attribute in request.GET:
+            kwargs[attribute] = request.GET[attribute]
     id = ID.bind(identifier, **kwargs)
     return render_to_response('id_dump.txt', {'id':id})
 

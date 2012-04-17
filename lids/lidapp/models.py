@@ -11,6 +11,9 @@ class Requester(models.Model):
     date_created = models.DateTimeField()
     description = models.TextField(blank=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Minter(models.Model):
 
@@ -21,6 +24,9 @@ class Minter(models.Model):
     minter_type = models.CharField(max_length=1, choices=settings.ID_TYPES)
     date_created = models.DateTimeField()
     description = models.TextField()
+
+    def __unicode__(self):
+        return self.name
 
 
 class ID(models.Model):
@@ -37,6 +43,9 @@ class ID(models.Model):
     object_url = models.URLField(blank=True)
     object_type = models.CharField(max_length=1, choices=settings.OBJECT_TYPES, blank=True)
     description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return identifier
 
     @staticmethod
     def exists(identifier):
