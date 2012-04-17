@@ -43,7 +43,6 @@ class BindTestCase(unittest.TestCase):
         self.assertEqual(bound_id.object_type, 'i')
         self.assertEqual(bound_id.object_url, 'digital.library.gwu.edu/item/'+self.one_id)
         self.assertEqual(bound_id.description, 'Our first object!')
-
 class LookupTestCase(unittest.TestCase):
     def setUp(self):
         ids = ID.mint(requester_name='Gelman', minter_name='gwark', quantity=1)

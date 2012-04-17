@@ -27,7 +27,7 @@ pip install django
 
 5) install MySQL
 
-sudo apt-get install mysql-server
+sudo apt-get install mysql
 
 6) build dependencies for python  MySQLdb libraries
 
