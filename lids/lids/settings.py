@@ -178,6 +178,6 @@ ACTIONS = (
     )
 
 try:
-    from local_settings.py import *
+    from local_settings import *
 except ImportError:
     pass
