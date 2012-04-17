@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from lidapp.models import ID
 
 
@@ -9,12 +10,11 @@ def mint(request, minter_name, quantity=1):
     return HttpResponse(output)
         
 def bind(request, identifier):
-    kwargs = {'object_type':'', 'object_url':'', 'description':''}
-    for attribute in kwargs:
+    fields = ['object_type', 'object_url', 'description']
+    kwargs = {}
+    for attribute in fields:
         if attribute in request.POST:
             kwargs[attribute] = request.POST[attribute]
-        else:
-            kwargs.remove(attribute)
     id = ID.bind(identifier, **kwargs)
     return render_to_response('id_dump.txt', {'id':id})
 

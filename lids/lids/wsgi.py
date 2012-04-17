@@ -17,7 +17,7 @@ import os, site
 
 site.addstedir('/home/joshuagomez/Projects/idservice/ENV/lib/python2.6/site-packages')
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idservice.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lid.settings")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

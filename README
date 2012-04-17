@@ -51,4 +51,45 @@ exit
 
 pip install git+https://github.com/gwu-libraries/arkpy
 
+10) Direct wsgi file to your local site packages
+
+vim /home/<user/Projects/idservice/lids/lids/wsgi.py
+
+Change parameter for site.addsitedir() to your local path.
+If you followed these instructions faithfully so far, you only need to change the user name in the path.
+
+11) Edit Apache configs to enable WSGI daemon mode
+
+vim /etc/apache2/sites-available/default
+
+Add the followings lines to the end of the file (be sure to adjust the user name and your version of Python:
+
+    # idservice settings
+    WSGIDaemonProcess <your.server.domain> processes=2 threads=15 python-path=/home/<user>/Projects/idservice/ENV/lib/python/2.X/site-packages:/home/<user>/Projects/idservice/lids
+    WSGIProcessGroup <your.server.domain>
+
+    WSGIScriptAlias / /home/<user>/Projects/idservice/lids/lids/wsgi.py
+
+    <Directory /home/<user>/Projects/idservice/lids/lidapp>
+        <Files wsgi.py>
+            Order deny,allow
+            Allow from all
+        </Files>
+    </Directory>
+
+
+12) set up the database from Django (be sure your virtualenv is still activated)
+
+cd lids
+python manage.py syncdb
+
+
+13) Create primary minters and requesters in the DB
+
+python manage.py dbshell
+
+INSERT INTO lidapp_minter SET name='<name>', authority_number='<your NMA#>', prefix='<optional prefix>', template='<your template>', minter_type='<types of IDs to mint>', date_created=NOW(), description='<optional>';
+
+INSERT INTO lidapp_requester SET name='<name>', organization='<your org>', date_created=NOW(), description='<optional>';
+
 
