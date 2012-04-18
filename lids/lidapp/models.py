@@ -73,7 +73,8 @@ class ID(models.Model):
                 identifier = ID._generate_id(id_type=minter.minter_type, prefix=minter.prefix,
                                              authority_number=minter.authority_number, template=minter.template)
                 while ID.exists(identifier):
-                    identifier = ID._generate_id(id_type)
+                    identifier = ID._generate_id(id_type=minter.minter_type, prefix=minter.prefix, 
+                                                 authority_number=minter.authority_number, template=minter.template)
                 ID.objects.create(identifier=identifier, minter=minter, id_type=minter.minter_type,
                                   requester=requester, date_created=datetime.now())
                 ids.append(identifier)
