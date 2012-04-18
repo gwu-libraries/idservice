@@ -4,7 +4,7 @@ Installation Instructions
 
 sudo apt-get install python-setuptools
 
-easy_install virtualenv
+sudo easy_install virtualenv
 
 2) create directory for project and clone it
 
@@ -19,7 +19,7 @@ virtualenv ENV
 
 4) activate it
 
-source activate ENV/bin/activate
+source ENV/bin/activate
 
 4) install django
 
@@ -43,7 +43,7 @@ mysql -u root -p
 
 CREATE DATABASE idservice;
 CREATE USER 'django' IDENTIFIED BY '<djangopassword>';
-GRANT ALL ON idservice TO django;
+GRANT ALL ON idservice.* TO django;
 FLUSH PRIVILIGES;
 exit
 
@@ -56,31 +56,31 @@ pip install git+https://github.com/gwu-libraries/arkpy
 vim /home/<user/Projects/idservice/lids/lids/wsgi.py
 
 Change parameter for site.addsitedir() to your local path.
-If you followed these instructions faithfully so far, you only need to change the user name in the path.
+Your will need to change the user name and possibly the Python version number
 
-11) Edit Apache configs to enable WSGI daemon mode
+11) Install mod_wsgi if necessary, and add apache config file to sites-enabled (This part may be different depending on which OS and version of Apache you are using).
 
-vim /etc/apache2/sites-available/default
+sudo apt-get install libapache2-mod-wsgi
 
-Add the followings lines to the end of the file (be sure to adjust the user name and your version of Python:
+sudo mv /home/<user>/Projects/idservice/apache/id /etc/apache2/sites-enabled/id
 
-    # idservice settings
-    WSGIDaemonProcess <your.server.domain> processes=2 threads=15 python-path=/home/<user>/Projects/idservice/ENV/lib/python/2.X/site-packages:/home/<user>/Projects/idservice/lids
-    WSGIProcessGroup <your.server.domain>
+sudo vim /etc/apache2/sites-enabled/id
 
-    WSGIScriptAlias / /home/<user>/Projects/idservice/lids/lids/wsgi.py
+Change the values of the server, user, and python version in the document
 
-    <Directory /home/<user>/Projects/idservice/lids/lidapp>
-        <Files wsgi.py>
-            Order deny,allow
-            Allow from all
-        </Files>
-    </Directory>
+sudo a2ensite id
 
+sudo /etc/init.d/apache2 restart
 
 12) set up the database from Django (be sure your virtualenv is still activated)
 
-cd lids
+cd lids/lids
+cp settings.py local_settings.py
+vim local_settings.py
+
+(change database login and password)
+
+cd ..
 python manage.py syncdb
 
 

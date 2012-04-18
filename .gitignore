@@ -1,2 +1,3 @@
 *.pyc
 ENV
+lids/lids/local_settings.py

@@ -1,0 +1,20 @@
+<VirtualHost *:80>
+
+    ServerName <you.server.name>
+    DocumentRoot /home/<user>/Projects/idservice/lids/lids
+
+    WSGIDaemonProcess id.library.gwu.edu processes=2 threads=15 python-path=/home/<user>/Projects/idservice/ENV/lib/python/2.X/site-packages:/home/<user>/Projects/idservice/lids
+
+    WSGIProcessGroup <your.server.name>
+
+    WSGIScriptAlias / /home/<user>/Projects/idservice/lids/lids/wsgi.py
+
+    <Directory /home/<user>/Projects/idservice/lids/lids>
+        <Files wsgi.py>
+            Order deny,allow
+            Allow from all
+        </Files>
+    </Directory>
+
+</VirtualHost>
+
