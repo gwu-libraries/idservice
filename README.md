@@ -19,7 +19,7 @@ This software should be runnable on any kind of operating system. However, these
 
 2. Install git if not already installed
 
-Follow the excellent instructions found on the [github website](http://help.github.com/linux-set-up-git/)
+    Follow the excellent instructions found on the [github website](http://help.github.com/linux-set-up-git/)
 
 3. Install MySQL and build dependency libraries for Python
 
@@ -27,7 +27,7 @@ Follow the excellent instructions found on the [github website](http://help.gith
 
         `sudo apt-get build-dep python-mysqldb`
 
-Create root account when prompted
+    Create root account when prompted
 - - -
 **Part II - Setting up the project environment**
 
@@ -89,13 +89,13 @@ Create root account when prompted
 
         `vim /home/<user/Projects/idservice/lids/lids/wsgi.py`
 
-Change parameter for site.addsitedir() to your local path. You will need to change the user name and possibly the Python version number.
+    Change parameter for site.addsitedir() to your local path. You will need to change the user name and possibly the Python version number.
 
 16. Edit Apache config file
 
         `vim /home/<user>/Projects/idservice/apache/id`
 
-Change the values of the server, user, and python version in the document
+    Change the values of the server, user, and python version in the document
 
 17. Add apache config file to sites-enabled and enable it
 
@@ -113,7 +113,7 @@ Change the values of the server, user, and python version in the document
 
         `vim local_settings.py`
 
-Change database login and password and any other parameters you wish to change.
+    Change database login and password and any other parameters you wish to change.
 
 19. Let Django create the database tables for you
 
@@ -133,10 +133,10 @@ Change database login and password and any other parameters you wish to change.
 
         `sudo /etc/init.d/apache2 restart`
 
-For minting: `http://<your domain name>/mint/<minter name>/<quantity of ids to mint>?requester=<your requester name>`
+    For minting: `http://<your domain name>/mint/<minter name>/<quantity of ids to mint>?requester=<your requester name>`
 
-For binding: `http://<your domain name>/bind/<identifier>?object_url=<url to bind>&object_type=<choice of i or c>&description=<optional text field>`
+    For binding: `http://<your domain name>/bind/<identifier>?object_url=<url to bind>&object_type=<choice of i or c>&description=<optional text field>`
 
-For object type, there are currently only two types: i for Item and c for Collection. You can add to these by editing the local_settings.py file
+    For object type, there are currently only two types: i for Item and c for Collection. You can add to these by editing the local_settings.py file
 
-For lookup: `http://<your domain name>/lookup/<identifier>`
+    For lookup: `http://<your domain name>/lookup/<identifier>`
