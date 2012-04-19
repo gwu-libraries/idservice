@@ -9,7 +9,7 @@ Installation Instructions
 -------------------------
 This software should be runnable on any kind of operating system. However, these installation instructions are tailored to a Linux server, and have only been tested on ubuntu 10.04 LTS.
 
-    **Part I - Basic server requirements**
+**Part I - Basic server requirements**
 
 1. Install Apache if not already installed. Also install the WSGI module if not already installed
 
@@ -28,7 +28,9 @@ This software should be runnable on any kind of operating system. However, these
         sudo apt-get build-dep python-mysqldb
 
     Create root account when prompted
+
 - - -
+
 **Part II - Setting up the project environment**
 
 4. Install virtualenv
@@ -68,7 +70,9 @@ This software should be runnable on any kind of operating system. However, these
 13. Install arkpy
 
         pip install git+https://github.com/gwu-libraries/arkpy
+
 - - -
+
 **Part III - Configuring your installation**
 
 14. Log in to MySQL and create the idservice user and database. Make up a user name and password.
@@ -129,14 +133,26 @@ This software should be runnable on any kind of operating system. However, these
 
         INSERT INTO lidapp_requester SET name='<name>', organization='<your org>', date_created=NOW(), description='<optional>';
 
-21. Your system should now run. You may want to restart Apache just in case. Test out the minting and binding functions.
+- - -
+
+**Part IV - Testing**
+
+Your system should now run. 
+
+21. You may want to restart Apache just in case. 
 
         sudo /etc/init.d/apache2 restart
 
-    For minting: http://<your domain name>/mint/<minter name>/<quantity of ids to mint>?requester=<your requester name>
+22. Test the minting function
 
-    For binding: http://<your domain name>/bind/<identifier>?object_url=<url to bind>&object_type=<choice of i or c>&description=<optional text field>
+        http://<your domain name>/mint/<minter name>/<quantity of ids to mint>?requester=<your requester name>
+
+23. Test the binding function
+
+        http://<your domain name>/bind/<identifier>?object_url=<url to bind>&object_type=<choice of i or c>&description=<optional text field>
 
     For object type, there are currently only two types: i for Item and c for Collection. You can add to these by editing the local_settings.py file
 
-    For lookup: http://<your domain name>/lookup/<identifier>
+24. Test the lookup function
+
+        http://<your domain name>/lookup/<identifier>
