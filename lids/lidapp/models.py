@@ -45,7 +45,7 @@ class ID(models.Model):
     description = models.TextField(blank=True)
 
     def __unicode__(self):
-        return identifier
+        return self.identifier
 
     @staticmethod
     def exists(identifier):
