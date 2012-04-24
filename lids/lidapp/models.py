@@ -28,6 +28,26 @@ class Minter(models.Model):
     def __unicode__(self):
         return self.name
 
+    def _generate_id(self):
+        # Currently only generates ARKs
+        if self.minter_type == 'a':
+            return arkpy.mint(authority=self.authority_number, prefix=self.prefix, template=self.template)
+
+    def _id_exists(self, identifier):
+        res = ID.objects.filter(identifier=identifier)
+        return True if len(res) > 0 else False
+
+    def mint(self, requester, quantity=1):
+        ids = []
+        for i in range(int(quantity)):
+            identifier = self._generate_id()
+            while self._id_exists(identifier):
+                identifier = self._generate_id()
+            id = ID.objects.create(identifier=identifier, minter=self, id_type=self.minter_type,
+                                   requester=requester, date_created=datetime.now())
+            ids.append(id)
+        return ids
+
 
 class ID(models.Model):
     
@@ -47,60 +67,9 @@ class ID(models.Model):
     def __unicode__(self):
         return identifier
 
-    @staticmethod
-    def exists(identifier):
-        res = ID.objects.filter(identifier=identifier)
-        return True if len(res) > 0 else False
-
-    @staticmethod
-    def lookup(identifier):
-        try:
-            id = ID.objects.get(identifier=identifier)
-            return id
-        except Exception, e:
-            return None
-
-    @staticmethod
-    def mint(requester_name, minter_name, quantity=1):
-        ids = []
-        try:
-            requester = Requester.objects.get(name=requester_name)
-            minter = Minter.objects.get(name=minter_name)
-        except Exception, e:
-            return ids
-        else:
-            for i in range(int(quantity)):
-                identifier = ID._generate_id(id_type=minter.minter_type, prefix=minter.prefix,
-                                             authority_number=minter.authority_number, template=minter.template)
-                while ID.exists(identifier):
-                    identifier = ID._generate_id(id_type=minter.minter_type, prefix=minter.prefix, 
-                                                 authority_number=minter.authority_number, template=minter.template)
-                ID.objects.create(identifier=identifier, minter=minter, id_type=minter.minter_type,
-                                  requester=requester, date_created=datetime.now())
-                ids.append(identifier)
-            return ids
-
-    @staticmethod
-    def _generate_id(id_type, prefix, authority_number, template):
-        if id_type == 'a':
-            return arkpy.mint(authority=authority_number, prefix=prefix, template=template)
-        ''' Stubs for potential future id types
-        elif id_type == 'Handle':
-            return handle.mint()
-        else:
-            return ''
-        '''
-
-    @staticmethod
-    def bind(identifier, **kwargs):
-        try:
-            id = ID.objects.get(identifier=identifier)
-        except Exception, e:
-            return None
-        else:
-            for att in kwargs.keys():
-                if att in ['object_url','object_type','description']:
-                    setattr(id, att, kwargs[att])
-            id.date_updated = datetime.now()
-            id.save()
-            return id
+    def bind(self, **kwargs):     
+        for var in kwargs:
+            if var in settings.bindable_fields:
+                setattr(self, var, kwargs[var])
+        self.date_updated = datetime.now()
+        self.save()

@@ -177,6 +177,8 @@ ACTIONS = (
     ('l','lookup'),
     )
 
+bindable_fields = ['object_url','object_type','description']
+
 try:
     from local_settings import *
 except ImportError:

@@ -1,21 +1,23 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from lidapp.models import ID
+from lidapp.models import ID, Minter, Requester
 
 
 def mint(request, minter_name, quantity=1):
-    ids = ID.mint(requester_name=request.GET['requester'], minter_name=minter_name, quantity=quantity)
-    output = '\n'.join(ids)
+    minter = get_object_or_404(Minter, name=minter_name)
+    requester = get_object_or_404(Requester, name=request.GET['requester'])
+    ids = minter.mint(requester=requester, quantity=quantity)
+    output = '\n'.join([id.identifier for id in ids])
     return HttpResponse(output)
         
 def bind(request, identifier):
-    fields = ['object_type', 'object_url', 'description']
-    kwargs = {}
-    for attribute in fields:
-        if attribute in request.GET:
-            kwargs[attribute] = request.GET[attribute]
-    id = ID.bind(identifier, **kwargs)
+    id = get_object_or_404(ID, identifier=identifier)
+    atts = {'object_type':None, 'object_url':None, 'description':None}
+    for att in atts:
+        if att in request.GET:
+            atts[att] = request.GET[att]
+    id.bind(**atts)
     return render_to_response('id_dump.txt', {'id':id})
 
 def lookup(request, identifier):
