@@ -4,7 +4,7 @@ from lidapp.models import ID, Minter, Requester
 import json
 
 def _ids_to_json(ids):
-    return json.dumps([id.to_dict() for id in ids], indent=2)
+    return json.dumps([id.dump_dict() for id in ids], indent=2)
 
 def mint(request, minter_name, quantity=1):
     minter = get_object_or_404(Minter, name=minter_name)

@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils.timezone import now
 from django.db import models
 from lids import settings
 import arkpy
@@ -28,6 +28,11 @@ class Minter(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_minter_type(self):
+        for pair in settings.ID_TYPES:
+            if pair[0] == self.minter_type:
+                return pair[1]
+
     def _generate_id(self):
         # Currently only generates ARKs
         if self.minter_type == 'a':
@@ -44,7 +49,7 @@ class Minter(models.Model):
             while self._id_exists(identifier):
                 identifier = self._generate_id()
             id = ID.objects.create(identifier=identifier, minter=self, id_type=self.minter_type,
-                                   requester=requester, date_created=datetime.now())
+                                   requester=requester, date_created=now())
             ids.append(id)
         return ids
 
@@ -73,10 +78,20 @@ class ID(models.Model):
         for var in kwargs:
             if var in self.bindable_fields:
                 setattr(self, var, kwargs[var])
-        self.date_updated = datetime.now()
+        self.date_updated = now()
         self.save()
 
-    def to_dict(self):
+    def get_object_type(self):
+        for pair in settings.OBJECT_TYPES:
+            if pair[0] == self.object_type:
+                return pair[1]
+
+    def get_id_type(self):
+        for pair in settings.ID_TYPES:
+            if pair[0] == self.id_type:
+                return pair[1]
+
+    def dump_dict(self):
         return {'identifier':self.identifier,
                 'date_created':str(self.date_created),
                 'date_updated':str(self.date_updated),
@@ -86,3 +101,15 @@ class ID(models.Model):
                 'object_url':self.object_url,
                 'object_type':self.object_type,
                 'description':self.description}
+
+    def dump_string(self):
+        string = '  identifier: %s\n' % self.identifier
+        string += '     id type: %s\n' % self.get_id_type()
+        string += '      minter: %s\n' % self.minter
+        string += '   requester: %s\n' % self.requester
+        string += 'date created: %s\n' % self.date_created
+        string += 'date updated: %s\n' % self.date_updated
+        string += ' object type: %s\n' % self.get_object_type()
+        string += '  object url: %s\n' % self.object_url
+        string += ' description: %s\n' % self.description
+        return string
