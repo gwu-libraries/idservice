@@ -14,6 +14,7 @@ urlpatterns = patterns('lidapp.views',
     (r'^mint/(?P<minter_name>\w+)/(?P<quantity>[1-9]\d{0,2})$', 'mint'),
     (r'^bind/(?P<identifier>\w+/\w+)$', 'bind'),
     (r'^lookup/(?P<identifier>\w+/\w+)$', 'lookup'),
+    (r'^(?P<identifier>\w+/\w+)$', 'resolve'),
 
 )
 

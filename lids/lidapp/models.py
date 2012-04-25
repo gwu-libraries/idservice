@@ -64,12 +64,25 @@ class ID(models.Model):
     object_type = models.CharField(max_length=1, choices=settings.OBJECT_TYPES, blank=True)
     description = models.TextField(blank=True)
 
+    bindable_fields = ['object_url','object_type','description']
+
     def __unicode__(self):
-        return identifier
+        return self.identifier
 
     def bind(self, **kwargs):     
         for var in kwargs:
-            if var in settings.bindable_fields:
+            if var in self.bindable_fields:
                 setattr(self, var, kwargs[var])
         self.date_updated = datetime.now()
         self.save()
+
+    def to_dict(self):
+        return {'identifier':self.identifier,
+                'date_created':str(self.date_created),
+                'date_updated':str(self.date_updated),
+                'id_type':self.id_type,
+                'minter':str(self.minter),
+                'requester':str(self.requester),
+                'object_url':self.object_url,
+                'object_type':self.object_type,
+                'description':self.description}
