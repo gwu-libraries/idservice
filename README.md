@@ -25,7 +25,7 @@ This software should be runnable on any kind of operating system. However, these
 
         sudo apt-get install mysql-server
 
-        sudo apt-get build-dep python-mysqldb
+        sudo apt-get install python-dev
 
     Create root account when prompted
 
@@ -67,7 +67,11 @@ This software should be runnable on any kind of operating system. However, these
 
         pip install mysql-python
 
-13. Install arkpy
+11. Install pytz library for timezone awareness
+
+	pip install pytz
+
+12. Install arkpy
 
         pip install git+https://github.com/gwu-libraries/arkpy
 
