@@ -3,6 +3,7 @@ from lidapp.models import ID, Minter, Requester
 from lids import settings
 from optparse import make_option
 from django.utils.timezone import now
+from django.db.utils import IntegrityError
 from datetime import datetime
 import csv
 
