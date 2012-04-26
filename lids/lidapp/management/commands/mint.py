@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from lidapp.models import ID, Minter, Requester
 from optparse import make_option
-from datetime import datetime
+from django.utils.timezone import now
 
 class Command(BaseCommand):
     args = '<minter_name>'
@@ -33,7 +33,7 @@ class Command(BaseCommand):
         try:
             requester = Requester.objects.get(name='CommandLine')
         except Requester.DoesNotExist:
-            requester = Requester.objects.create(name='CommandLine', date_created=datetime.now())
+            requester = Requester.objects.create(name='CommandLine', date_created=now())
 
         ids = minter.mint(requester=requester, quantity=options['quantity'])
 

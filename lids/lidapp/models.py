@@ -6,7 +6,7 @@ import arkpy
 
 class Requester(models.Model):
 
-    name = models.CharField(max_length=63)
+    name = models.CharField(max_length=63, unique=True)
     organization = models.CharField(max_length=63)
     date_created = models.DateTimeField()
     description = models.TextField(blank=True)
@@ -17,7 +17,7 @@ class Requester(models.Model):
 
 class Minter(models.Model):
 
-    name = models.CharField(max_length=7)
+    name = models.CharField(max_length=7, unique=True)
     authority_number = models.CharField(max_length=15)
     prefix = models.CharField(max_length=7, blank=True)
     template = models.CharField(max_length=25, blank=True)
@@ -57,7 +57,7 @@ class Minter(models.Model):
 class ID(models.Model):
     
     # System generated fields
-    identifier = models.CharField(max_length=25)
+    identifier = models.CharField(max_length=25, unique=True)
     date_created = models.DateTimeField()
     date_updated = models.DateTimeField(blank=True, null=True)
     id_type = models.CharField(max_length=1, choices=settings.ID_TYPES) #This field is redundant on purpose
