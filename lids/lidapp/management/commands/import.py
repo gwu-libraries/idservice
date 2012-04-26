@@ -38,7 +38,7 @@ The fields must use the following names:
             raise CommandError('Please specify a csv file to read')
         reader = csv.DictReader(f)
         
-        count = 1
+        count, success, fail = 1,0,0
         for row in reader:
             # convert types to character codes
             id_type = self._get_id_type_char(row['id_type'])
@@ -74,14 +74,20 @@ The fields must use the following names:
                                                      date_created = now(),
                                                      description = 'A legacy place holder created on import. Not for current use')
             # finally, create the new object
-            id = ID.objects.create(identifier=row['identifier'],
-                                   id_type=id_type,
-                                   date_created=date_created,
-                                   minter=minter,
-                                   requester=requester,
-                                   object_url=row['object_url'],
-                                   object_type=object_type,
-                                   description=row['description'],
-                                   date_updated=now())
-            
-            self.stdout.write('%s Successfully import ID: %s\n' % (count, row['identifier']))
+            try:
+                id = ID.objects.create(identifier=row['identifier'],
+                                       id_type=id_type,
+                                       date_created=date_created,
+                                       minter=minter,
+                                       requester=requester,
+                                       object_url=row['object_url'],
+                                       object_type=object_type,
+                                       description=row['description'],
+                                       date_updated=now())
+                success += 1
+                self.stdout.write('%s Successfully import ID: %s\n' % (count, row['identifier']))
+            except IntegrityError:
+                fail += 1
+                self.stdout.write('%s ID %s already exists in database. Skipping...\n' % (count, row['identifier']))
+
+            self.stdout.write('Import process completed. %s Items successfully imported. %s Failed.' % (success, fail))
