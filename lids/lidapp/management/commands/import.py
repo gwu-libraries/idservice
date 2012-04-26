@@ -3,7 +3,6 @@ from lidapp.models import ID, Minter, Requester
 from lids import settings
 from optparse import make_option
 from django.utils.timezone import now
-from django.db.utils import IntegrityError
 from datetime import datetime
 import csv
 
@@ -91,4 +90,4 @@ The fields must use the following names:
                 fail += 1
                 self.stdout.write('%s ID %s already exists in database. Skipping...\n' % (count, row['identifier']))
 
-            self.stdout.write('Import process completed. %s Items successfully imported. %s Failed.' % (success, fail))
+        self.stdout.write('Import process completed. %s Items successfully imported. %s Failed.\n' % (success, fail))
