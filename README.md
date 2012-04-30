@@ -23,9 +23,7 @@ This software should be runnable on any kind of operating system. However, these
 
 3. Install MySQL and build dependency libraries for Python
 
-        sudo apt-get install mysql-server
-
-        sudo apt-get install python-dev
+        sudo apt-get install mysql-server libmysqlclient-dev 
 
     Create root account when prompted
 
@@ -53,27 +51,16 @@ This software should be runnable on any kind of operating system. However, these
 
         cd /home/<user>/Projects/idservice
         
-        virtualenv ENV
+        virtualenv --no-site-packages ENV
 
 8. Activate your virtual environment
 
         source ENV/bin/activate
 
-9. Install django
+9. Install django, mysqldb, arkpy, pytz
 
-        pip install django
+        pip install -r requirements.txt
 
-10. Install MySQLdb python libraries
-
-        pip install mysql-python
-
-11. Install pytz library for timezone awareness
-
-	pip install pytz
-
-12. Install arkpy
-
-        pip install git+https://github.com/gwu-libraries/arkpy
 
 - - -
 
@@ -89,7 +76,7 @@ This software should be runnable on any kind of operating system. However, these
 
         GRANT ALL ON idservice.* TO <django user name>;
     
-        FLUSH PRIVILIGES;
+        FLUSH PRIVILEGES;
 
         exit
 

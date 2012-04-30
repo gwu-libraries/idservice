@@ -70,9 +70,10 @@ class ID(models.Model):
     description = models.TextField(blank=True)
 
     bindable_fields = ['object_url','object_type','description']
-
+    
     def __unicode__(self):
         return self.identifier
+
 
     def bind(self, **kwargs):     
         for var in kwargs:

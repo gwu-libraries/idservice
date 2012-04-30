@@ -1,0 +1,4 @@
+django
+mysql-python
+pytz
+git+https://github.com/gwu-libraries/arkpy
