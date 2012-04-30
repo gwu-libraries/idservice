@@ -104,7 +104,7 @@ This software should be runnable on any kind of operating system. However, these
 
         cd lids/lids
 
-        cp settings.py local_settings.py
+        mv local_settings.py.template local_settings.py
 
         vim local_settings.py
 

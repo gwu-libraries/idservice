@@ -14,7 +14,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'idservice',                      # Or path to database file if using sqlite3.
+        'NAME': '',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -156,9 +156,6 @@ LOGGING = {
     }
 }
 
-# ID SERVICE CONFIGURATIONS
-DEFAULT_MINTER = 'ark'
-
 # Models settings
 OBJECT_TYPES = (
     ('i', 'item'),
@@ -170,13 +167,6 @@ ID_TYPES = (
     #('h', 'handle'),
     #('d', 'doi'),
     )
-ACTIONS = (
-    ('m','mint'),
-    ('b','bind'),
-    ('l','lookup'),
-    )
-
-bindable_fields = ['object_url','object_type','description']
 
 try:
     from local_settings import *
