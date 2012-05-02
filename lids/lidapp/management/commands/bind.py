@@ -27,18 +27,21 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        logger = logging.getLogger('lidapp.actions')
-        identifier = args[0]
         try:
+            logger = logging.getLogger('lidapp.actions')
+            identifier = args[0]
             id = ID.objects.get(identifier=identifier)
+            kwargs = {}
+            for opt in options:
+                if opt in id.bindable_fields and options[opt] != None:
+                    kwargs[opt] = options[opt]
+            id.bind(**kwargs)
+            logger.info('Action: bind  IP: 127.0.0.1  ID: %s  Result:SUCCESS. Data: %s' % (identifier, kwargs))
+            self.stdout.write(id.dump_string() + '\n')
         except ID.DoesNotExist:
             raise CommandError('Identifier "%s" does not exist' % identifier)
+        except ID.NoChanges:
+            raise CommandError('You did not input any changes to the data')
+        except ID.NoData:
+            raise CommandError('You did not supply any data to bind.')
 
-        kwargs = {}
-        for opt in options:
-            if options[opt] != None:
-                kwargs[opt] = options[opt]
-        id.bind(**kwargs)
-
-        logger.info('Action: bind  IP: 127.0.0.1  ID: %s  Result:SUCCESS. Data: %s' % (identifier, kwargs))
-        self.stdout.write(id.dump_string() + '\n')

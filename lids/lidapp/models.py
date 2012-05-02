@@ -88,10 +88,16 @@ class ID(models.Model):
         return self.identifier
 
 
-    def bind(self, **kwargs):     
+    def bind(self, **kwargs):
+        if len(kwargs) == 0:
+            raise self.NoData()
+        changes = 0
         for var in kwargs:
-            if var in self.bindable_fields:
+            if var in self.bindable_fields and kwargs[var] != getattr(self, var):
+                changes += 1
                 setattr(self, var, kwargs[var])
+        if changes == 0:
+            raise self.NoChanges()
         self.date_updated = now()
         self.save()
 
@@ -127,3 +133,8 @@ class ID(models.Model):
         string += '  object url: %s\n' % self.object_url
         string += ' description: %s\n' % self.description
         return string
+
+    class NoChanges(Exception): pass
+
+    class NoData(Exception): pass
+        

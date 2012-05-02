@@ -35,22 +35,28 @@ def bind(request, identifier):
     try:
         requester = Requester.objects.get(ip=ip)
         id = ID.objects.get(identifier=identifier)
+        if requester.admin == False and not id.requester.ip == requester.ip:
+            logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. Requester not authorized to edit ID' % (ip, identifier))
+            return HttpResponseForbidden('You are not authorized to bind data to ID %s from IP address %s' % (identifier, ip))
+        kwargs = {}
+        for field in id.bindable_fields:
+            if field in request.GET:
+                kwargs[field] = request.GET[field]
+        id.bind(**kwargs)
+        logger.info('Action: bind  IP: %s  ID: %s  Result:SUCCESS. Data: %s' % (ip, identifier, kwargs))
+        return HttpResponse(_ids_to_json([id]), content_type='application/json')
     except Requester.DoesNotExist:
         logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. IP not recognized' % (ip, identifier))
         raise Http404('You are not permitted to bind IDs from IP address %s' % ip)
     except ID.DoesNotExist:
         logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. Identifier does not exist' % (ip, identifier))
         raise Http404('ID %s does not exist %s' % identifier)    
-    if requester.admin == False and not id.requester.ip == requester.ip:
-        logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. Requester not authorized to edit ID' % (ip, identifier))
-        return HttpResponseForbidden('You are not authorized to bind data to ID %s from IP address %s' % (identifier, ip))
-    kwargs = {}
-    for field in id.bindable_fields:
-        if field in request.GET:
-            kwargs[field] = request.GET[field]
-    id.bind(**kwargs)
-    logger.info('Action: bind  IP: %s  ID: %s  Result:SUCCESS. Data: %s' % (ip, identifier, kwargs))
-    return HttpResponse(_ids_to_json([id]), content_type='application/json')
+    except ID.NoChanges:
+        logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. No changes to bind' % (ip, identifier))
+        raise Http404('No changes to the data were included in your request %s' % identifier)
+    except ID.NoData:
+        logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. No data to bind' % (ip, identifier))
+        raise Http404('No data were included in your request %s' % identifier)
 
 def lookup(request, identifier):
     ip = request.META['REMOTE_ADDR']
