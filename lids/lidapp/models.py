@@ -25,7 +25,8 @@ class Minter(models.Model):
     template = models.CharField(max_length=25, blank=True)
     minter_type = models.CharField(max_length=1, choices=settings.ID_TYPES)
     date_created = models.DateTimeField()
-    description = models.TextField()
+    active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
@@ -45,6 +46,8 @@ class Minter(models.Model):
         return True if len(res) > 0 else False
 
     def mint(self, requester, quantity=1):
+        if self.active == False:
+            raise self.InactiveMinter(self.name)
         ids = []
         for i in range(int(quantity)):
             identifier = self._generate_id()
@@ -54,6 +57,14 @@ class Minter(models.Model):
                                    requester=requester, date_created=now())
             ids.append(id)
         return ids
+
+    class InactiveMinter(Exception):
+
+        def __init__(self, name):
+            self.name = name
+
+        def __repr__(self):
+            return 'Minter "%s" is no longer allowed to mint new idetifiers.' % self.name
 
 
 class ID(models.Model):

@@ -64,6 +64,7 @@ The fields must use the following names:
                                                template='unkown',
                                                minter_type=id_type,
                                                date_created=now(),
+                                               active=False,
                                                description='A legacy place holder created on import. Not for current use')
             # get requester object - create legacy requester if necessary
             requester_name = row['requester_name'] if row['requester_name'] else 'legacy'
