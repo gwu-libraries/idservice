@@ -1,32 +1,76 @@
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponse, Http404, HttpResponseForbidden
+from django.shortcuts import redirect
+from django.utils.timezone import now
 from lidapp.models import ID, Minter, Requester
+import logging
 import json
+
+logger = logging.getLogger('lidapp.actions')
 
 def _ids_to_json(ids):
     return json.dumps([id.dump_dict() for id in ids], indent=2)
 
 def mint(request, minter_name, quantity=1):
-    minter = get_object_or_404(Minter, name=minter_name)
-    requester = get_object_or_404(Requester, name=request.GET['requester'])
+    ip = request.META['REMOTE_ADDR']
+    quantity = int(quantity)
+    try:
+        requester = Requester.objects.get(ip=ip)
+        minter = Minter.objects.get(name=minter_name)
+    except Requester.DoesNotExist:
+        logger.info('Action: mint %s  IP: %s  Result:FAILED. IP not recognized' %(quantity, ip))
+        raise Http404('You are not permitted to mint IDs from IP address %s' % ip)
+    except Minter.DoesNotExist:
+        logger.info('Action: mint %s  IP: %s  Result:FAILED.  Minter %s does not exist' % (quantity, ip, minter_name))
+        raise Http404('Minter %s does not exist' % minter_name)
     ids = minter.mint(requester=requester, quantity=quantity)
+    for x in range(quantity):
+        logger.info('Action: mint %s of %s  IP: %s  Result:SUCCESS.  Minted %s' % (x+1, quantity, ip, ids[x].identifier))
     return HttpResponse(_ids_to_json(ids), content_type='application/json')
         
 def bind(request, identifier):
-    id = get_object_or_404(ID, identifier=identifier)
+    ip = request.META['REMOTE_ADDR']
+    try:
+        requester = Requester.objects.get(ip=ip)
+        id = ID.objects.get(identifier=identifier)
+    except Requester.DoesNotExist:
+        logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. IP not recognized' % (ip, identifier))
+        raise Http404('You are not permitted to bind IDs from IP address %s' % ip)
+    except ID.DoesNotExist:
+        logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. Identifier does not exist' % (ip, identifier))
+        raise Http404('ID %s does not exist %s' % identifier)    
+    if requester.admin == False and not id.requester.ip == requester.ip:
+        logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. Requester not authorized to edit ID' % (ip, identifier))
+        return HttpResponseForbidden('You are not authorized to bind data to ID %s from IP address %s' % (identifier, ip))
     kwargs = {}
     for field in id.bindable_fields:
         if field in request.GET:
             kwargs[field] = request.GET[field]
     id.bind(**kwargs)
+    logger.info('Action: bind  IP: %s  ID: %s  Result:SUCCESS. Data: %s' % (ip, identifier, kwargs))
     return HttpResponse(_ids_to_json([id]), content_type='application/json')
 
 def lookup(request, identifier):
-    id = get_object_or_404(ID,identifier=identifier)
+    ip = request.META['REMOTE_ADDR']
+    try:
+        id = ID.objects.get(identifier=identifier)
+    except ID.DoesNotExist:
+        logger.info('Action: lookup  IP: %s  ID: %s  Result:FAILED. Identifier does not exist' % (ip, identifier))
+        raise Http404('ID %s does not exist %s' % identifier)
+    logger.info('Action: lookup  IP: %s  ID: %s  Result:SUCCESS.' % (ip, identifier))
     return HttpResponse(_ids_to_json([id]), content_type='application/json')
 
 def resolve(request, identifier):
-    id = get_object_or_404(ID,identifier=identifier)
+    ip = request.META['REMOTE_ADDR']
+    try:
+        id = ID.objects.get(identifier=identifier)
+    except ID.DoesNotExist:
+        logger.info('Action: resolve  IP: %s  ID: %s  Result:FAILED. Identifier does not exist' % (ip, identifier))
+        raise Http404('ID %s does not exist' % identifier)
     if id.object_url:
-        url = id.object_url if id.object_url.startswith('http://') else 'http://'+id.object_url
+        url = id.object_url if id.object_url.startswith('http') else 'http://'+id.object_url
+        logger.info('Action: resolve  IP: %s  ID: %s  Result:SUCCESS.' % (ip, identifier))
         return redirect(url)
+    else:
+        logger.info('Action: resolve  IP: %s  ID: %s  Result:FAILED. Identifier has not been bound to a url' % (ip, identifier))
+        raise Http404('ID %s has not been bound to a url' % identifier)
+        #TODO: provide a more graceful resolution error page

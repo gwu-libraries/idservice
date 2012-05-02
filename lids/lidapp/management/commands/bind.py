@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from lidapp.models import ID
 from optparse import make_option
+import logging
 
 
 class Command(BaseCommand):
@@ -26,6 +27,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        logger = logging.getLogger('lidapp.actions')
         identifier = args[0]
         try:
             id = ID.objects.get(identifier=identifier)
@@ -38,4 +40,5 @@ class Command(BaseCommand):
                 kwargs[opt] = options[opt]
         id.bind(**kwargs)
 
+        logger.info('Action: bind  IP: 127.0.0.1  ID: %s  Result:SUCCESS. Data: %s' % (identifier, kwargs))
         self.stdout.write(id.dump_string() + '\n')

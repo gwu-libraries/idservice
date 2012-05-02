@@ -7,8 +7,10 @@ import arkpy
 class Requester(models.Model):
 
     name = models.CharField(max_length=63, unique=True)
-    organization = models.CharField(max_length=63)
+    organization = models.CharField(max_length=63, blank=True)
+    ip = models.IPAddressField(unique=True)
     date_created = models.DateTimeField()
+    admin = models.BooleanField(default=False)
     description = models.TextField(blank=True)
 
     def __unicode__(self):

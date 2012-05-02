@@ -1,4 +1,5 @@
 *.pyc
+*.log
 ENV
 lids/lids/local_settings.py
 *~
