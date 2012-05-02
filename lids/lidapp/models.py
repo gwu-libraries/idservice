@@ -16,11 +16,20 @@ class Requester(models.Model):
     def __unicode__(self):
         return self.name
 
+    def dump_string(self):
+        string =  '         name: %s\n' % self.name
+        string += ' organization: %s\n' % self.organization
+        string += '   IP address: %s\n' % self.ip
+        string += 'administrator: %s\n' % self.admin
+        string += ' date created: %s\n' % self.date_created 
+        string += '  description: %s\n' % self.description
+        return string
+
 
 class Minter(models.Model):
 
     name = models.CharField(max_length=7, unique=True)
-    authority_number = models.CharField(max_length=15)
+    authority_number = models.CharField(max_length=15, blank=True)
     prefix = models.CharField(max_length=7, blank=True)
     template = models.CharField(max_length=25, blank=True)
     minter_type = models.CharField(max_length=1, choices=settings.ID_TYPES)
@@ -30,11 +39,6 @@ class Minter(models.Model):
 
     def __unicode__(self):
         return self.name
-
-    def get_minter_type(self):
-        for pair in settings.ID_TYPES:
-            if pair[0] == self.minter_type:
-                return pair[1]
 
     def _generate_id(self):
         # Currently only generates ARKs
@@ -57,6 +61,17 @@ class Minter(models.Model):
                                    requester=requester, date_created=now())
             ids.append(id)
         return ids
+
+    def dump_string(self):
+        string =  '            name: %s\n' % self.name
+        string += '     minter type: %s\n' % self.get_minter_type_display()
+        string += '    date created: %s\n' % self.date_created
+        string += 'authority number: %s\n' % self.authority_number
+        string += '          prefix: %s\n' % self.prefix
+        string += '        template: %s\n' % self.template
+        string += '          active: %s\n' % self.active
+        string += '     description: %s\n' % self.description
+        return string
 
     class InactiveMinter(Exception):
 
@@ -101,16 +116,6 @@ class ID(models.Model):
         self.date_updated = now()
         self.save()
 
-    def get_object_type(self):
-        for pair in settings.OBJECT_TYPES:
-            if pair[0] == self.object_type:
-                return pair[1]
-
-    def get_id_type(self):
-        for pair in settings.ID_TYPES:
-            if pair[0] == self.id_type:
-                return pair[1]
-
     def dump_dict(self):
         return {'identifier':self.identifier,
                 'date_created':str(self.date_created),
@@ -123,13 +128,13 @@ class ID(models.Model):
                 'description':self.description}
 
     def dump_string(self):
-        string = '  identifier: %s\n' % self.identifier
-        string += '     id type: %s\n' % self.get_id_type()
+        string =  '  identifier: %s\n' % self.identifier
+        string += '     id type: %s\n' % self.get_id_type_display()
         string += '      minter: %s\n' % self.minter
         string += '   requester: %s\n' % self.requester
         string += 'date created: %s\n' % self.date_created
         string += 'date updated: %s\n' % self.date_updated
-        string += ' object type: %s\n' % self.get_object_type()
+        string += ' object type: %s\n' % self.get_object_type_display()
         string += '  object url: %s\n' % self.object_url
         string += ' description: %s\n' % self.description
         return string
