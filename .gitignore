@@ -2,5 +2,6 @@
 *.log
 ENV
 lids/lids/local_settings.py
+lids/lids/wsgi.py
 *~
 *.swp

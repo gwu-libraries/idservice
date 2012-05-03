@@ -15,7 +15,7 @@ framework.
 """
 import os, site
 
-site.addsitedir('/home/joshuagomez/Projects/idservice/ENV/lib/python2.6/site-packages')
+#site.addsitedir('/home/<username>/Projects/idservice/ENV/lib/python2.<X>/site-packages')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lids.settings")
 
