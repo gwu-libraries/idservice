@@ -77,7 +77,7 @@ The fields must use the following names:
                                                      description = 'A legacy place holder created on import. Not for current use')
             # finally, create the new object
             try:
-                id = ID.objects.create(identifier=row['identifier'],
+                id_obj = ID.objects.create(identifier=row['identifier'],
                                        id_type=id_type,
                                        date_created=date_created,
                                        minter=minter,

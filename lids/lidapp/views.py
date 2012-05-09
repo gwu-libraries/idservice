@@ -8,7 +8,7 @@ import json
 logger = logging.getLogger('lidapp.actions')
 
 def _ids_to_json(ids):
-    return json.dumps([id.dump_dict() for id in ids], indent=2)
+    return json.dumps([id_obj.dump_dict() for id_obj in ids], indent=2)
 
 def mint(request, minter_name, quantity=1):
     ip = request.META['REMOTE_ADDR']
@@ -34,17 +34,17 @@ def bind(request, identifier):
     ip = request.META['REMOTE_ADDR']
     try:
         requester = Requester.objects.get(ip=ip)
-        id = ID.objects.get(identifier=identifier)
-        if requester.admin == False and not id.requester.ip == requester.ip:
+        id_obj = ID.objects.get(identifier=identifier)
+        if requester.admin == False and not id_obj.requester.ip == requester.ip:
             logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. Requester not authorized to edit ID' % (ip, identifier))
             return HttpResponseForbidden('You are not authorized to bind data to ID %s from IP address %s' % (identifier, ip))
         kwargs = {}
-        for field in id.bindable_fields:
-            if field in request.GET:
-                kwargs[field] = request.GET[field]
-        id.bind(**kwargs)
+        for field in id_obj.bindable_fields:
+            if field in request.REQUEST:
+                kwargs[field] = request.REQUEST[field]
+        id_obj.bind(**kwargs)
         logger.info('Action: bind  IP: %s  ID: %s  Result:SUCCESS. Data: %s' % (ip, identifier, kwargs))
-        return HttpResponse(_ids_to_json([id]), content_type='application/json')
+        return HttpResponse(_ids_to_json([id_obj]), content_type='application/json')
     except Requester.DoesNotExist:
         logger.info('Action: bind  IP: %s  ID: %s  Result:FAILED. IP not recognized' % (ip, identifier))
         raise Http404('You are not permitted to bind IDs from IP address %s' % ip)
@@ -61,9 +61,9 @@ def bind(request, identifier):
 def lookup(request, identifier):
     ip = request.META['REMOTE_ADDR']
     try:
-        id = ID.objects.get(identifier=identifier)
+        id_obj = ID.objects.get(identifier=identifier)
         logger.info('Action: lookup  IP: %s  ID: %s  Result:SUCCESS.' % (ip, identifier))
-        return HttpResponse(_ids_to_json([id]), content_type='application/json')
+        return HttpResponse(_ids_to_json([id_obj]), content_type='application/json')
     except ID.DoesNotExist:
         logger.info('Action: lookup  IP: %s  ID: %s  Result:FAILED. Identifier does not exist' % (ip, identifier))
         raise Http404('ID %s does not exist %s' % identifier)
@@ -71,9 +71,9 @@ def lookup(request, identifier):
 def resolve(request, identifier):
     try:
         ip = request.META['REMOTE_ADDR']
-        id = ID.objects.get(identifier=identifier)
-        if id.object_url:
-            url = id.object_url if id.object_url.startswith('http') else 'http://'+id.object_url
+        id_obj = ID.objects.get(identifier=identifier)
+        if id_obj.object_url:
+            url = id_obj.object_url if id_obj.object_url.startswith('http') else 'http://'+id_obj.object_url
             logger.info('Action: resolve  IP: %s  ID: %s  Result:SUCCESS.' % (ip, identifier))
             return redirect(url)
         else:

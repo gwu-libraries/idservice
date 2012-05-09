@@ -32,11 +32,11 @@ class Command(BaseCommand):
             for x in range(options['quantity']):
                 logger.info('Action: mint %s of %s  IP: 127.0.0.1  Result:SUCCESS.  Minted %s' % (x+1, options['quantity'], ids[x].identifier))
             if not options['verbose']:
-                output = '\n'.join([id.identifier for id in ids])
+                output = '\n'.join([id_obj.identifier for id_obj in ids])
                 self.stdout.write(output+'\n')
             else:
-                for id in ids:
-                    self.stdout.write(id.dump_string()+'\n')
+                for id_obj in ids:
+                    self.stdout.write(id_obj.dump_string()+'\n')
         except IndexError:
             raise CommandError('Please specify a minter')
         except Minter.DoesNotExist:

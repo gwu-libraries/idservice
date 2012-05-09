@@ -11,9 +11,9 @@ class Command(BaseCommand):
         logger = logging.getLogger('lidapp.actions')
         identifier = args[0]
         try:
-            id = ID.objects.get(identifier=identifier)
+            id_obj = ID.objects.get(identifier=identifier)
         except ID.DoesNotExist:
             raise CommandError('Identifier "%s" does not exist' % identifier)
 
         logger.info('Action: lookup  IP: 127.0.0.1  ID: %s  Result:SUCCESS.' % identifier)
-        self.stdout.write(id.dump_string() + '\n')
+        self.stdout.write(id_obj.dump_string() + '\n')

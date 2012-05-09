@@ -57,9 +57,9 @@ class Minter(models.Model):
             identifier = self._generate_id()
             while self._id_exists(identifier):
                 identifier = self._generate_id()
-            id = ID.objects.create(identifier=identifier, minter=self, id_type=self.minter_type,
-                                   requester=requester, date_created=now())
-            ids.append(id)
+            id_obj = ID.objects.create(identifier=identifier, minter=self, id_type=self.minter_type,
+                                       requester=requester, date_created=now())
+            ids.append(id_obj)
         return ids
 
     def dump_string(self):
