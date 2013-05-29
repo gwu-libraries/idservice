@@ -1,8 +1,8 @@
 idservice
 =========
 A Django application for the creation of unique identifiers for library collections and items.
-This was created as a replacement of the NOID software, though it is slightly different in scope.
-This application can mint new identifiers, bind urls and descriptions to them, and supports a lookup call as well. However, based on our local specs, a URL resolving function was not built in.
+This was created as a replacement of the NOID software.
+This application can mint new identifiers, bind urls and descriptions to them, and supports a lookup call as well.
 
 
 Installation Instructions
