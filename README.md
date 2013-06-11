@@ -95,7 +95,7 @@ This software should be runnable on any kind of operating system. However, these
 
 17. Add apache config file to sites-enabled and enable it
 
-        sudo mv /home/<user>/Projects/idservice/apache/id /etc/apache2/sites-enabled/id
+        sudo mv /home/<user>/Projects/idservice/apache/id /etc/apache2/sites-available/id
 
         sudo a2ensite id
 
