@@ -128,8 +128,7 @@ This software should be runnable on any kind of operating system. However, these
 
         INSERT INTO lidapp_minter SET name='<name>', authority_number='<your NMA#>', prefix='<optional prefix>', template='<your template>', minter_type='<types of IDs to mint>', date_created=NOW(), description='<optional>';
 
-        INSERT INTO lidapp_requester SET name='<name>', organization='<your org>', date_created=NOW(), description='<optional>';
-
+        INSERT INTO lidapp_requester SET name='<name>', organization='<your org>', date_created=NOW(), description='<optional>', 'ip'=<ip of requester>;
 - - -
 
 **Part IV - Testing**
