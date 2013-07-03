@@ -62,12 +62,16 @@ This software should be runnable on any kind of operating system. However, these
 
         pip install -r requirements.txt
 
+10. create a logs folder 
+
+        mkdir /home/<user>/Projects/idservice/lids/lids/logs
+
 
 - - -
 
 **Part III - Configuring your installation**
 
-14. Log in to MySQL and create the idservice user and database. Make up a user name and password.
+10. Log in to MySQL and create the idservice user and database. Make up a user name and password.
 
         mysql -u root -p
 
@@ -81,20 +85,20 @@ This software should be runnable on any kind of operating system. However, these
 
         exit
 
-15. Edit wsgi file
+11. Edit wsgi file
 
         mv /home/<user/Projects/idservice/lids/lids/wsgi.py.template /home/<user/Projects/idservice/lids/lids/wsgi.py
         vim /home/<user/Projects/idservice/lids/lids/wsgi.py
 
     Change parameter for site.addsitedir() to your local path. You will need to change the user name and possibly the Python version number.
 
-16. Edit Apache config file
+12. Edit Apache config file
 
         vim /home/<user>/Projects/idservice/apache/id
 
     Change the values of the server, user, and python version in the document
 
-17. Add apache config file to sites-enabled and enable it
+13. Add apache config file to sites-enabled and enable it
 
         sudo mv /home/<user>/Projects/idservice/apache/id /etc/apache2/sites-available/id
 
@@ -102,7 +106,7 @@ This software should be runnable on any kind of operating system. However, these
 
         sudo /etc/init.d/apache2 restart
 
-18. Configure database and other settings in a local_settings file
+14. Configure database and other settings in a local_settings file
 
         cd lids/lids
 
@@ -112,13 +116,13 @@ This software should be runnable on any kind of operating system. However, these
 
     Change database login and password and any other parameters you wish to change.
 
-19. Let Django create the database tables for you
+15. Let Django create the database tables for you
 
         cd ..
 
         python manage.py syncdb
 
-20. Create primary minters and requesters in the DB
+16. Create primary minters and requesters in the DB
 
         python manage.py dbshell
 
@@ -132,20 +136,20 @@ This software should be runnable on any kind of operating system. However, these
 
 Your system should now run. 
 
-21. You may want to restart Apache just in case. 
+17. You may want to restart Apache just in case. 
 
         sudo /etc/init.d/apache2 restart
 
-22. Test the minting function
+18. Test the minting function
 
         http://<your domain name>/mint/<minter name>/<quantity of ids to mint>?requester=<your requester name>
 
-23. Test the binding function
+19. Test the binding function
 
         http://<your domain name>/bind/<identifier>?object_url=<url to bind>&object_type=<choice of i or c>&description=<optional text field>
 
     For object type, there are currently only two types: i for Item and c for Collection. You can add to these by editing the local_settings.py file
 
-24. Test the lookup function
+20. Test the lookup function
 
         http://<your domain name>/lookup/<identifier>
