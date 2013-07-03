@@ -29,7 +29,7 @@ This software should be runnable on any kind of operating system. However, these
 
 4. Install pip if not already installed
 
-	python-pip python-dev build-essential
+	    python-pip python-dev build-essential
 
 - - -
 
