@@ -19,13 +19,17 @@ This software should be runnable on any kind of operating system. However, these
 
 2. Install git if not already installed
 
-    Follow the excellent instructions found on the [github website](http://help.github.com/linux-set-up-git/)
+    	sudo apt-get install git-core
 
 3. Install MySQL and build dependency libraries for Python
 
         sudo apt-get install mysql-server libmysqlclient-dev 
 
     Create root account when prompted
+
+4. Install pip if not already installed
+
+	python-pip python-dev build-essential
 
 - - -
 
@@ -74,7 +78,7 @@ This software should be runnable on any kind of operating system. However, these
 
         CREATE USER '<django user name>' IDENTIFIED BY '<django password>';
 
-        GRANT ALL ON idservice.* TO <django user name>;
+        GRANT ALL ON idservice.* TO <django user name>@'localhost';
     
         FLUSH PRIVILEGES;
 
