@@ -34,7 +34,7 @@ This software should be runnable on any kind of operating system. However, these
 
 4. Install virtualenv
 
-        sudo apt-get install python-setuptools
+        sudo apt-get install python-setuptools python-dev
 
         sudo easy_install virtualenv
 
@@ -77,7 +77,7 @@ This software should be runnable on any kind of operating system. However, these
 
         CREATE DATABASE idservice;
 
-        CREATE USER '<django user name>' IDENTIFIED BY '<django password>';
+        CREATE USER <django user name>@localhost IDENTIFIED BY '<django password>';
 
         GRANT ALL ON idservice.* TO <django user name>@'localhost';
     
@@ -92,21 +92,7 @@ This software should be runnable on any kind of operating system. However, these
 
     Change parameter for site.addsitedir() to your local path. You will need to change the user name and possibly the Python version number.
 
-12. Edit Apache config file
-
-        vim /home/<user>/Projects/idservice/apache/id
-
-    Change the values of the server, user, and python version in the document
-
-13. Add apache config file to sites-enabled and enable it
-
-        sudo mv /home/<user>/Projects/idservice/apache/id /etc/apache2/sites-available/id
-
-        sudo a2ensite id
-
-        sudo /etc/init.d/apache2 restart
-
-14. Configure database and other settings in a local_settings file
+12. Configure database and other settings in a local_settings file
 
         cd lids/lids
 
@@ -115,6 +101,22 @@ This software should be runnable on any kind of operating system. However, these
         vim local_settings.py
 
     Change database login and password and any other parameters you wish to change.
+
+13. Edit Apache config file
+
+        vim /home/<user>/Projects/idservice/apache/id
+
+    Change the values of the server, user, and python version in the document
+
+14. Add apache config file to sites-enabled and enable it
+
+        sudo mv /home/<user>/Projects/idservice/apache/id /etc/apache2/sites-available/id
+
+        sudo a2dissite default
+
+        sudo a2ensite id
+
+        sudo /etc/init.d/apache2 restart
 
 15. Let Django create the database tables for you
 
